@@ -1,0 +1,8 @@
+fun test(a, b) {
+	print a;
+	print b;
+}
+
+test("Hello", "World");
+
+print test;

@@ -1,0 +1,87 @@
+print "Hello, and welcome to the test script!";
+
+// Precedence and grouping
+var twelve = (1 + 2) * (8 / 2);
+print twelve;
+
+// Variable definition and assignment
+var a = 5;
+print a;
+a = 4;
+print a;
+
+// Scope and shadowing
+var a = "global a";
+var b = "global b";
+var c = "global c";
+print a;
+print b;
+print c;
+{
+	var b = "outer b";
+	var c = "outer c";
+	print a;
+	print b;
+	print c;
+	{
+		var a = "inner a";
+		print a;
+		print b;
+		print c;
+	}
+}
+print a;
+print b;
+print c;
+
+
+var a = 1;
+{
+	var a = a + 1;
+	print a;
+}
+
+// Control flow
+if (1 == 1) print "1 == 1";
+if (1 == 0) print "1 == 0";
+if ((1 == 0) or (1 == 1)) print "1 == 0 or 1 == 1";
+if ((1 == 1) or (1 == 0)) print "1 == 1 or 1 == 0";
+if ((1 == 1) and (1 == 0)) print "1 == 1 and 1 == 0";
+if ((1 == 0) and (1 == 1)) print "1 == 0 and 1 == 1";
+if ((1 == 1) and (1 == 1)) print "1 == 1 and 1 == 1";
+
+print "Counting to 10...";
+var i = 0;
+while (i < 10) {
+	print i;
+	i = i + 1;
+}
+
+print "Doing Fibonacci numbers with for loops. Fancy.";
+var a = 0;
+var temp;
+
+for (var b = 1; a < 10000; b = temp + b) {
+  print a;
+  temp = a;
+  a = b;
+}
+
+// Functions
+print clock();
+
+fun greet(a, b) {
+	print a + " " + b + "!";
+}
+
+greet("Hello", "World");
+
+print "Doing Fibonacci numbers with recursive functions. Yay stacks.";
+fun fib(n) {
+	if (n <= 1) return n;
+	return fib(n - 2) + fib(n - 1);
+}
+
+for (var i = 0; i < 20; i = i + 1) {
+	print fib(i);
+}

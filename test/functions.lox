@@ -1,0 +1,49 @@
+print "Functions in functions...";
+
+fun makeCounter() {
+  var i = 0;
+  fun count() {
+    i = i + 1;
+    print i;
+  }
+
+  return count;
+}
+
+var counter = makeCounter();
+counter(); // "1".
+counter(); // "2".
+
+print "Function pointers...";
+fun thrice(fn) {
+  for (var i = 1; i <= 3; i = i + 1) {
+    fn(i);
+  }
+}
+
+fun temp(a) {
+	print a;
+}
+
+thrice(temp);
+
+//thrice(fun (a) {
+//  print a;
+//});
+// "1".
+// "2".
+// "3".
+
+
+print "Static scoping...";
+var a = "global";
+{
+  fun showA() {
+    print a;
+  }
+
+  showA();
+  var a = "block";
+  showA();
+}
+
