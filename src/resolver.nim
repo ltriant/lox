@@ -108,7 +108,8 @@ proc resolveStmt(r: var Resolver, stmt: Stmt) =
     r.endScope
   of sVar:
     r.declare stmt.varToken
-    r.resolveExpr stmt.varExpression
+    if stmt.varExpression.isSome:
+      r.resolveExpr stmt.varExpression.get
     r.define stmt.varToken
   of sFun:
     r.declare stmt.funName

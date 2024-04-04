@@ -416,18 +416,9 @@ proc statement(p: var Parser): Stmt =
 proc varDeclaration(p: var Parser): Stmt =
   let name = p.consume(tIdentifier, "Expect variable name.")
 
-  # TODO
-  # This is resulting in:
-  #
-  #  > var a;
-  #  @[(kind: sVar, varToken: tIdentifier a, varExpression: (kind: oNil, nilVal: ""))]
-  #  > var a = nil;
-  #  @[(kind: sVar, varToken: tIdentifier a, varExpression: (kind: oNil, nilVal: ""))]
-  #
-  # So I can't tell when a variable is uninitialised. Maybe I need an `undefined` value, different from nil.
-  var expr = Expr(kind: eLiteral, literalValue: newUndefined())
+  var expr = none(Expr)
   if p.match(tEqual):
-    expr = p.expression()
+    expr = some(p.expression())
 
   discard p.consume(tSemicolon, "Expect ';' after variable declaration.")
   Stmt(kind: sVar, varToken: name, varExpression: expr)

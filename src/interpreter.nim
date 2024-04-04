@@ -30,7 +30,7 @@ proc checkNumberOperands(t: Token, os: varargs[Object]) =
     if o.kind != oNumber:
       raise RuntimeError(token: t, msg: "Operands must be numbers.")
 
-proc lookUpVariable(name: Token, expr: Expr): Object =
+proc lookUpVariable(name: Token, expr: Expr): Option[Object] =
   if locals.contains(expr):
     env.getAt(locals[expr], name.lexeme)
   else:
@@ -99,9 +99,11 @@ proc evaluate*(e: Expr): Object =
       return Object(kind: oNil, nilVal: 0)
   of eVariable:
     let val = lookUpVariable(e.varName, e)
-    if val.kind == oUndefined:
+
+    if val.isNone:
       raise RuntimeError(token: e.varName, msg: "Variable is not defined.")
-    return val
+
+    return val.get
   of eAssign:
     let val = evaluate(e.assignValue)
 
@@ -173,7 +175,10 @@ proc execute(s: Stmt) =
   of sExpression:
     discard evaluate(s.exprExpression)
   of sVar:
-    env.define s.varToken, evaluate(s.varExpression)
+    if s.varExpression.isSome:
+      env.define s.varToken, some(evaluate(s.varExpression.get))
+    else:
+      env.define s.varToken, none(Object)
   of sBlock:
     executeBlock s.blockStmts, newEnvironment(some(env))
   of sIf:
@@ -190,7 +195,7 @@ proc execute(s: Stmt) =
       arity: s.funParams.len.uint,
       call: proc (env: var Environment, args: seq[Object]): Object =
         for i, param in s.funParams:
-          env.define param, args[i]
+          env.define param, some(args[i])
 
         try:
           executeBlock s.funBody, env

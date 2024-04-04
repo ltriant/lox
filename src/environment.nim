@@ -13,7 +13,7 @@ type
     call*: (proc (env: var Environment, args: seq[Object]): Object)
 
   Environment* = ref object
-    values: Table[string, Object]
+    values: Table[string, Option[Object]]
     functions: Table[string, LoxFunction]
     enclosing: Option[Environment]
 
@@ -21,7 +21,7 @@ proc `$`*(e: Environment): string = $e.values
 
 proc newEnvironment*(enclosing: Option[Environment] = none(Environment)): Environment =
   Environment(
-    values: initTable[string, Object](),
+    values: initTable[string, Option[Object]](),
     functions: initTable[string, LoxFunction](),
     enclosing: enclosing,
   )
@@ -34,16 +34,16 @@ proc ancestor(e: Environment, distance: uint): Environment =
 
   return env.get
 
-proc define*(e: var Environment, key: Token, val: Object) =
+proc define*(e: var Environment, key: Token, val: Option[Object]) =
   e.values[key.lexeme] = val
 
 proc defineFun*(e: var Environment, key: string, val: LoxFunction) =
-  e.values[key] = newIdentifier(key)
+  e.values[key] = some(newIdentifier(key))
   e.functions[key] = val
 
 proc assign*(e: var Environment, key: Token, val: Object) =
   if e.values.contains(key.lexeme):
-    e.values[key.lexeme] = val
+    e.values[key.lexeme] = some(val)
     return
 
   if e.enclosing.isSome:
@@ -54,9 +54,9 @@ proc assign*(e: var Environment, key: Token, val: Object) =
   raise RuntimeError(token: key, msg: fmt"Undefined variable '{key.lexeme}'")
 
 proc assignAt*(e: var Environment, distance: uint, key: Token, val: Object) =
-  e.ancestor(distance).values[key.lexeme] = val
+  e.ancestor(distance).values[key.lexeme] = some(val)
 
-proc get*(e: Environment, key: Token): Object =
+proc get*(e: Environment, key: Token): Option[Object] =
   if e.values.contains(key.lexeme):
     return e.values[key.lexeme]
 
@@ -79,5 +79,6 @@ proc getFunc*(e: Environment, key: Object): LoxFunction =
 
   raise RuntimeException(msg: fmt"Undefined function '{key.identifierVal}'.")
 
-proc getAt*(e: Environment, distance: uint, name: string): Object =
+proc getAt*(e: Environment, distance: uint, name: string): Option[Object] =
   e.ancestor(distance).values[name]
+

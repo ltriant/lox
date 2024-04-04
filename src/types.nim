@@ -70,7 +70,6 @@ type
     oNumber
     oBoolean
     oNil
-    oUndefined
     oIdentifier
 
   Object* = object
@@ -83,8 +82,6 @@ type
         boolVal*: bool
       of oNil:
         nilVal*: int
-      of oUndefined:
-        undefVal*: int
       of oIdentifier:
         identifierVal*: string
 
@@ -142,7 +139,7 @@ type
       printExpression*: Expr
     of sVar:
       varToken*: Token
-      varExpression*: Expr
+      varExpression*: Option[Expr]
     of sBlock:
       blockStmts*: seq[Stmt]
     of sIf:
@@ -164,7 +161,6 @@ proc newBoolean*(v: bool): Object = Object(kind: oBoolean, boolVal: v)
 proc newNumber*(v: float): Object = Object(kind: oNumber, floatVal: v)
 proc newString*(v: string): Object = Object(kind: oString, strVal: v)
 proc newNil*: Object = Object(kind: oNil, nilVal: 0)
-proc newUndefined*: Object = Object(kind: oUndefined, undefVal: 0)
 proc newIdentifier*(v: string): Object = Object(kind: oIdentifier, identifierVal: v)
 
 proc `$`*(t: Token): string =
@@ -207,8 +203,6 @@ proc `$`*(o: Object): string =
     $o.boolVal
   of oNil:
     "nil"
-  of oUndefined:
-    "undef"
   of oIdentifier:
     fmt"<fn {o.identifierVal}>"
 
@@ -253,8 +247,6 @@ func hash*(o: Object): Hash =
     o.boolVal.hash
   of oNil:
     o.nilVal.hash
-  of oUndefined:
-    o.undefVal.hash
   of oIdentifier:
     o.identifierVal.hash
 
