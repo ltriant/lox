@@ -7,6 +7,7 @@ import interpreter
 import parser
 import scanner
 import types
+import resolver
 
 proc runFile(file: string) =
   ## Interpret a single file.
@@ -14,10 +15,15 @@ proc runFile(file: string) =
     fileContents = file.readFile
     scanner = newScanner(fileContents)
     parser = newParser(scanner.scanTokens())
+    resolver = newResolver()
 
   let statements = parser.parse()
-  interpret statements
+ 
+  resolver.resolve statements
+  if hadError:
+    quit 65;
 
+  interpret statements
   if hadError:
     quit 65
 

@@ -1,3 +1,6 @@
+var twelve = 12;
+print twelve;
+
 var a;
 a = 5;
 print a;

@@ -1,4 +1,5 @@
 import std/
+  hashes,
   options,
   sequtils,
   strformat,
@@ -242,3 +243,42 @@ proc isTruthy*(o: Object): bool =
 func isCallable*(o: Object): bool =
   o.kind == oIdentifier
 
+func hash*(o: Object): Hash =
+  case o.kind
+  of oString:
+    o.strVal.hash
+  of oNumber:
+    o.floatVal.hash
+  of oBoolean:
+    o.boolVal.hash
+  of oNil:
+    o.nilVal.hash
+  of oUndefined:
+    o.undefVal.hash
+  of oIdentifier:
+    o.identifierVal.hash
+
+func hash*(t: Token): Hash =
+  !$(t.lexeme.hash !& t.line.hash)
+
+func hash*(e: Expr): Hash =
+  case e.kind
+  of eBinary:
+    !$(e.binaryOp.hash !& e.binLeft.hash !& e.binRight.hash)
+  of eUnary:
+    !$(e.unaryOp.hash !& e.unaryRight.hash)
+  of eGrouping:
+    e.expression.hash
+  of eLiteral:
+    e.literalValue.hash
+  of eVariable:
+    e.varName.hash
+  of eAssign:
+    !$(e.assignToken.hash !& e.assignValue.hash)
+  of eLogical:
+    !$(e.logicalLeft.hash !& e.logicalOp.hash !& e.logicalRight.hash)
+  of eCall:
+    var h = e.callCallee.hash !& e.callParen.hash
+    for a in e.callArguments:
+      h = h !& a.hash
+    h

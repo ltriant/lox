@@ -3,6 +3,7 @@ import std/
   sequtils,
   strformat,
   sugar,
+  tables,
   times
 
 import environment
@@ -15,7 +16,8 @@ type
 
 var
   globals = newEnvironment()
-  env = newEnvironment(some(globals))
+  env = globals # newEnvironment(some(globals))
+  locals = newTable[Expr, uint]()
 
 globals.defineFun "clock", LoxFunction(
   closure: env,
@@ -27,6 +29,12 @@ proc checkNumberOperands(t: Token, os: varargs[Object]) =
   for o in os:
     if o.kind != oNumber:
       raise RuntimeError(token: t, msg: "Operands must be numbers.")
+
+proc lookUpVariable(name: Token, expr: Expr): Object =
+  if locals.contains(expr):
+    env.getAt(locals[expr], name.lexeme)
+  else:
+    globals.get(name)
 
 proc evaluate*(e: Expr): Object =
   case e.kind
@@ -90,13 +98,18 @@ proc evaluate*(e: Expr): Object =
     else:
       return Object(kind: oNil, nilVal: 0)
   of eVariable:
-    let val = env.get(e.varName)
+    let val = lookUpVariable(e.varName, e)
     if val.kind == oUndefined:
       raise RuntimeError(token: e.varName, msg: "Variable is not defined.")
     return val
   of eAssign:
     let val = evaluate(e.assignValue)
-    env.assign e.assignToken, val
+
+    if locals.contains(e):
+      env.assignAt locals[e], e.assignToken, val
+    else:
+      globals.assign e.assignToken, val
+
     return val
   of eLogical:
     let left = evaluate(e.logicalLeft)
@@ -195,3 +208,6 @@ proc interpret*(statements: seq[Stmt]) =
       execute s
   except RuntimeError as ex:
     runtimeError ex
+
+proc resolve*(expr: Expr, distance: uint) =
+  locals[expr] = distance
